@@ -1,0 +1,61 @@
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #27272a;
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #3f3f46;
+}
+
+/* Premium Refinements */
+:root {
+    --neon-blue: #3b82f6;
+    --neon-green: #22c55e;
+    --neon-red: #ef4444;
+    --neon-amber: #f59e0b;
+}
+
+.glass-card {
+    background: rgba(24, 24, 27, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.neon-glow-blue { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+.neon-glow-green { box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
+.neon-glow-red { box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+
+/* Traffic Light Animations */
+.light-bulb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    filter: brightness(0.2);
+    background: #18181b;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.light-bulb.active-red { background: var(--neon-red); filter: brightness(1); box-shadow: 0 0 15px var(--neon-red); }
+.light-bulb.active-orange { background: var(--neon-amber); filter: brightness(1); box-shadow: 0 0 15px var(--neon-amber); }
+.light-bulb.active-green { background: var(--neon-green); filter: brightness(1); box-shadow: 0 0 15px var(--neon-green); }
+
+/* Grid Overlay for Map */
+#map-container::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+    z-index: 400;
+}
+
+.nav-item { color: #71717a; transition: all 0.3s; cursor: pointer; }

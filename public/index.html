@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGT Cotonou | Central Supervision</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-['Outfit'] overflow-hidden">
+
+    <!-- Auth Overlay -->
+    <div id="auth-overlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-all duration-500">
+        <div class="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-600/20 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-2xl font-bold">SIGT COTONOU</h2>
+                <p class="text-zinc-500">Accès restreint au centre de contrôle</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <input type="text" placeholder="Utilisateur" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 outline-none" value="admin">
+                <input type="password" placeholder="Mot de passe" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 outline-none" value="admin">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all">Se connecter</button>
+            </form>
+            <div id="otp-step" class="hidden space-y-4 mt-6 text-center">
+                <p class="text-sm text-blue-400">Code OTP : 123456</p>
+                <input type="text" id="otp-input" placeholder="000000" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-center tracking-widest text-2xl font-bold outline-none">
+                <button id="verify-otp" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg">Vérifier & Entrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div id="app-shell" class="flex h-screen opacity-0 transition-opacity duration-1000">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col">
+            <div class="p-6 flex items-center gap-3 font-bold text-xl text-blue-500">
+                <i data-lucide="traffic-cone"></i> SIGT CORE
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="#" class="nav-item active flex items-center gap-4 p-3 rounded-xl" data-screen="dashboard">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item flex items-center gap-4 p-3 rounded-xl" data-screen="intersection">
+                    <i data-lucide="crosshair"></i> Vue Carrefour
+                </a>
+                <a href="#" class="nav-item flex items-center gap-4 p-3 rounded-xl" data-screen="alerts">
+                    <i data-lucide="bell"></i> Alertes
+                </a>
+                <a href="#" class="nav-item flex items-center gap-4 p-3 rounded-xl" data-screen="stats">
+                    <i data-lucide="bar-chart-3"></i> Statistiques
+                </a>
+                <a href="#" class="nav-item flex items-center gap-4 p-3 rounded-xl" data-screen="settings">
+                    <i data-lucide="settings"></i> Configuration
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="h-16 border-b border-zinc-800 flex items-center justify-between px-8 bg-zinc-950/50 backdrop-blur-md">
+                <h1 id="screen-title" class="text-xl font-semibold">Tableau de Bord Principal</h1>
+                <div class="flex items-center gap-6">
+                    <div class="hidden xl:flex items-center gap-4 border-r border-zinc-800 pr-6">
+                        <div class="text-right">
+                            <p class="text-[10px] text-zinc-500 uppercase font-bold">Météo Cotonou</p>
+                            <p class="text-xs font-bold">29°C • Humidité 82%</p>
+                        </div>
+                        <i data-lucide="cloud-rain" class="text-blue-400 w-5 h-5"></i>
+                    </div>
+                    <div class="hidden xl:flex items-center gap-4 border-r border-zinc-800 pr-6">
+                        <div class="text-right">
+                            <p class="text-[10px] text-zinc-500 uppercase font-bold">Charge Système</p>
+                            <div class="w-20 h-1.5 bg-zinc-800 rounded-full mt-1 overflow-hidden">
+                                <div id="load-bar" class="bg-green-500 h-full w-[42%] transition-all duration-1000"></div>
+                            </div>
+                        </div>
+                        <i data-lucide="cpu" class="text-zinc-500 w-5 h-5"></i>
+                    </div>
+                    <div class="flex items-center gap-2 text-zinc-400">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                        <span id="live-clock" class="text-sm font-mono tracking-tighter">12:00:00</span>
+                    </div>
+                </div>
+            </header>
+
+            <div id="screens-container" class="flex-1 overflow-y-auto p-8">
+                <!-- Dashboard -->
+                <section id="screen-dashboard" class="screen-view space-y-6">
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl">
+                            <p class="text-zinc-500 text-xs uppercase mb-1">Débit Réseau</p>
+                            <p id="kpi-flow" class="text-3xl font-bold">6,750 v/h</p>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl">
+                            <p class="text-zinc-500 text-xs uppercase mb-1">Attente Moyenne</p>
+                            <p id="kpi-wait" class="text-3xl font-bold">76.5s</p>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl border-red-500/20">
+                            <p class="text-zinc-500 text-xs uppercase mb-1">Alertes Actives</p>
+                            <p id="kpi-alerts" class="text-3xl font-bold text-red-500">2</p>
+                        </div>
+                    </div>
+                    <div class="h-[500px] bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden" id="map-container"></div>
+                </section>
+
+                <!-- Intersection Focus -->
+                <section id="screen-intersection" class="screen-view hidden space-y-8">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <span class="text-zinc-400 text-sm">FOCUS CARREFOUR :</span>
+                            <select id="intersection-selector" class="bg-zinc-800 border border-zinc-700 px-4 py-2 rounded-xl outline-none font-bold text-blue-400">
+                                <option value="stade">Stade de l’Amitié</option>
+                                <option value="cadjehoun">Cadjehoun</option>
+                                <option value="godomey">Godomey</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-3 py-1 bg-blue-500/10 text-blue-500 text-[10px] font-bold rounded-full border border-blue-500/20">ALGO: MAXPRESSURE V2.1</span>
+                            <span class="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-bold rounded-full border border-green-500/20">MODE: ADAPTATIF</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Road Schematic -->
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-[3rem] p-8 relative overflow-hidden flex items-center justify-center min-h-[500px] shadow-inner">
+                            <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('https://www.transparenttextures.com/patterns/asphalt-light.png');"></div>
+                            
+                            <!-- Intersection Center -->
+                            <div class="relative w-72 h-72 border-4 border-zinc-800 rounded-full flex items-center justify-center bg-zinc-950/50">
+                                <!-- North Axis -->
+                                <div class="absolute -top-24 flex flex-col items-center gap-2">
+                                    <p class="text-[10px] font-bold text-zinc-600">NORD</p>
+                                    <div id="tl-north" class="w-6 h-16 bg-zinc-900 border border-zinc-700 rounded-xl flex flex-col items-center justify-around p-1.5 shadow-xl">
+                                        <div class="light-bulb red"></div>
+                                        <div class="light-bulb orange"></div>
+                                        <div class="light-bulb green"></div>
+                                    </div>
+                                    <div class="bg-zinc-950 px-2 py-0.5 rounded text-[10px] border border-zinc-800">
+                                        <span id="queue-north" class="font-bold text-blue-400">0</span> v.
+                                    </div>
+                                </div>
+                                <!-- South Axis -->
+                                <div class="absolute -bottom-24 flex flex-col items-center gap-2">
+                                    <div class="bg-zinc-950 px-2 py-0.5 rounded text-[10px] border border-zinc-800">
+                                        <span id="queue-south" class="font-bold text-blue-400">0</span> v.
+                                    </div>
+                                    <div id="tl-south" class="w-6 h-16 bg-zinc-900 border border-zinc-700 rounded-xl flex flex-col items-center justify-around p-1.5 shadow-xl">
+                                        <div class="light-bulb red"></div>
+                                        <div class="light-bulb orange"></div>
+                                        <div class="light-bulb green"></div>
+                                    </div>
+                                    <p class="text-[10px] font-bold text-zinc-600">SUD</p>
+                                </div>
+                                <!-- East Axis -->
+                                <div class="absolute -right-28 flex items-center gap-3">
+                                    <div id="tl-east" class="w-16 h-6 bg-zinc-900 border border-zinc-700 rounded-xl flex items-center justify-around p-1.5 shadow-xl">
+                                        <div class="light-bulb red"></div>
+                                        <div class="light-bulb orange"></div>
+                                        <div class="light-bulb green"></div>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-[10px] font-bold text-zinc-600">EST</p>
+                                        <div class="bg-zinc-950 px-2 py-0.5 rounded text-[10px] border border-zinc-800">
+                                            <span id="queue-east" class="font-bold text-blue-400">0</span> v.
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- West Axis -->
+                                <div class="absolute -left-28 flex items-center gap-3">
+                                    <div class="text-center">
+                                        <p class="text-[10px] font-bold text-zinc-600">OUEST</p>
+                                        <div class="bg-zinc-950 px-2 py-0.5 rounded text-[10px] border border-zinc-800">
+                                            <span id="queue-west" class="font-bold text-blue-400">0</span> v.
+                                        </div>
+                                    </div>
+                                    <div id="tl-west" class="w-16 h-6 bg-zinc-900 border border-zinc-700 rounded-xl flex items-center justify-around p-1.5 shadow-xl">
+                                        <div class="light-bulb red"></div>
+                                        <div class="light-bulb orange"></div>
+                                        <div class="light-bulb green"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Center Logic Display -->
+                                <div class="text-center">
+                                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Cycle</p>
+                                    <div id="phase-timer" class="text-7xl font-black font-mono text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                                        24
+                                    </div>
+                                    <div id="active-phase-label" class="text-[10px] font-bold text-blue-500 mt-2">AXE NORD-SUD</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Side Metrics -->
+                        <div class="space-y-6">
+                            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl">
+                                <h3 class="text-xs font-bold text-zinc-500 uppercase mb-6">Pression Différentielle (Real-time)</h3>
+                                <div class="space-y-6">
+                                    <div>
+                                        <div class="flex justify-between text-[10px] mb-2">
+                                            <span class="text-zinc-400">AXE NORD-SUD</span>
+                                            <span id="pressure-val-ns" class="text-blue-400">45%</span>
+                                        </div>
+                                        <div class="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                                            <div id="bar-pressure-ns" class="h-full bg-blue-500 transition-all duration-500" style="width: 45%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-[10px] mb-2">
+                                            <span class="text-zinc-400">AXE EST-OUEST</span>
+                                            <span id="pressure-val-ew" class="text-amber-400">75%</span>
+                                        </div>
+                                        <div class="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                                            <div id="bar-pressure-ew" class="h-full bg-amber-500 transition-all duration-500" style="width: 75%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl h-64 shadow-2xl">
+                                <canvas id="chart-pressure"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Alerts -->
+                <section id="screen-alerts" class="screen-view hidden">
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+                        <table class="w-full text-left">
+                            <thead class="bg-zinc-800/50 border-b border-zinc-800">
+                                <tr>
+                                    <th class="px-6 py-4 text-xs font-bold text-zinc-500 uppercase">Horodatage</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-zinc-500 uppercase">Localisation</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-zinc-500 uppercase">Événement</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-zinc-500 uppercase">Criticité</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-zinc-500 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alerts-table-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Settings -->
+                <section id="screen-settings" class="screen-view hidden">
+                    <form id="settings-form" class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-6 max-w-2xl mx-auto">
+                        <h2 class="text-xl font-bold mb-6">Paramètres MaxPressure</h2>
+                        <div class="space-y-4">
+                            <label class="block">
+                                <span class="text-xs font-bold text-zinc-500 uppercase">Durée min. Vert ($T_{min}$)</span>
+                                <input type="range" min="5" max="30" value="15" name="t_min" class="w-full accent-blue-500">
+                            </label>
+                            <label class="block">
+                                <span class="text-xs font-bold text-zinc-500 uppercase">Durée max. Vert ($T_{max}$)</span>
+                                <input type="range" min="60" max="180" value="120" name="t_max" class="w-full accent-blue-500">
+                            </label>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 font-bold py-4 rounded-xl">Appliquer via MQTT</button>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
