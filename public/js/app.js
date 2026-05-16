@@ -112,8 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         state.map = L.map('map-container').setView([6.3812, 2.3754], 16);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© CartoDB',
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© CartoDB | SIGT-BENIN',
             maxZoom: 19
         }).addTo(state.map);
         
