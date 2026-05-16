@@ -235,9 +235,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const body = document.getElementById('alerts-table-body');
         if(!body) return;
         const mockData = [
-            { time: "10:12:04", loc: "Carrefour Godomey", ev: "Défaillance matérielle : Capteur IR actif double faisceau (E3Z-T61) déconnecté sur l'Axe Nord", sev: "CRITIQUE", act: "Alerte maintenance envoyée" },
-            { time: "09:45:12", loc: "Carrefour Stade de l'Amitié", ev: "Préemption d'Urgence : Sirène d'ambulance détectée par le microphone MEMS (Score : 85%)", sev: "MAJEURE", act: "Priorité Axe Nord-Sud accordée" },
-            { time: "08:30:15", loc: "Carrefour Cadjehoun", ev: "Sécurité : Plantage du script de contrôle local. Relais Watchdog (MAX6369) - Mode Jaunes Clignotants", sev: "CRITIQUE", act: "Redémarrage système en cours" }
+            { time: "13:55:41", loc: "Stade de l'Amitié — Axe Nord", ev: "Préemption d'Urgence : Sirène d'ambulance détectée par le microphone MEMS (Score acoustique DSP : 85% > Seuil 80%)", sev: "MAJEURE", act: "Priorité Axe Nord-Sud accordée — Cycle court (15s)" },
+            { time: "11:28:09", loc: "Stade de l'Amitié — Axe Est", ev: "Défaillance capteur : Détecteur IR double faisceau (E3Z-T61) sur l'approche Est — Perte de mesure de file", sev: "CRITIQUE", act: "Mode dégradé activé — Valeurs estimées par IA" },
+            { time: "09:14:33", loc: "Stade de l'Amitié — Liaison LoRa", ev: "Délai de communication LoRa > 5 s détecté entre le CII et le contrôleur local INT-01", sev: "INFO", act: "Reconnexion automatique réussie (3.2 s)" }
         ];
         body.innerHTML = mockData.map(a => `
             <tr class="border-b border-zinc-800/50 hover:bg-zinc-800/20 transition-colors">
