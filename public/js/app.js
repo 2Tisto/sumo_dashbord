@@ -3,9 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const state = { 
         currentScreen: 'dashboard', 
-        timer: 60, // T_BASE initial
+        timer: 60,
         charts: {},
         intersectionPhase: 'NS',
+        map: null,
+        mapInitialized: false,
         // Variables Algorithme MaxPressure Bénin
         T_MIN: 15,
         T_MAX: 90,
@@ -65,7 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     initStatsCharts();
                     initExportSystem();
                 }
-                if(screen === 'dashboard') initMap();
+                if(screen === 'dashboard') {
+                    initMap();
+                    // Fix Leaflet blank map on SPA navigation
+                    setTimeout(() => { if(state.map) state.map.invalidateSize(); }, 100);
+                }
                 if(screen === 'alerts') populateAlerts();
             });
         });
@@ -97,16 +103,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const initMap = () => {
         const mapContainer = document.getElementById('map-container');
-        if(!mapContainer || state.mapInitialized) return;
+        if(!mapContainer) return;
         
-        const map = L.map('map-container').setView([6.3812, 2.3754], 16);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+        // Si la carte existe déjà, juste recalculer la taille
+        if(state.mapInitialized && state.map) {
+            setTimeout(() => state.map.invalidateSize(), 100);
+            return;
+        }
+        
+        state.map = L.map('map-container').setView([6.3812, 2.3754], 16);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© CartoDB',
+            maxZoom: 19
+        }).addTo(state.map);
         
         const icon = L.divIcon({
             className: 'custom-marker',
-            html: `<div class="w-6 h-6 bg-emerald-500 rounded-full border-2 border-white neon-glow-emerald"></div>`
+            html: `<div style="width:18px;height:18px;background:#10b981;border-radius:50%;border:3px solid white;box-shadow:0 0 14px #10b981;"></div>`
         });
-        L.marker([6.3812, 2.3754], { icon }).addTo(map).bindPopup(`<b class="text-zinc-900">INT-01 | Carrefour du Stade de l’Amitié (Actif)</b>`);
+        L.marker([6.3812, 2.3754], { icon }).addTo(state.map)
+            .bindPopup(`<b style="color:#09090b">INT-01 | Carrefour du Stade de l'Amitié ✔ MaxPressure Actif</b>`);
         
         state.mapInitialized = true;
     };

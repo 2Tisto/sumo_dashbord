@@ -49,16 +49,9 @@
 .light-bulb.active-orange { background: var(--neon-amber); filter: brightness(1); box-shadow: 0 0 15px var(--neon-amber); }
 .light-bulb.active-green { background: var(--neon-green); filter: brightness(1); box-shadow: 0 0 15px var(--neon-green); }
 
-/* Grid Overlay for Map */
-#map-container::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size: 30px 30px;
-    z-index: 400;
-}
+
+/* Leaflet Map Container */
+#map-container { position: relative; }
 
 .nav-item { color: #71717a; transition: all 0.3s; cursor: pointer; border-left: 3px solid transparent; }
 .nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
