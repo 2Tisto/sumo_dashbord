@@ -31,6 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('screen-title').innerText = item.innerText.trim();
             state.currentScreen = screen;
             if(screen === 'intersection') initIntersectionCharts();
+            if(screen === 'stats') {
+                initStatsCharts();
+                initExportSystem();
+            }
         });
     });
 
@@ -38,7 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const initApp = () => {
         initMap();
         setInterval(() => {
-            document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
+            const clock = document.getElementById('live-clock');
+            if(clock) clock.innerText = new Date().toLocaleTimeString();
             updateSystemLoad();
         }, 1000);
         setInterval(updateIntersection, 1000);
@@ -46,6 +51,113 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(triggerEmergencyEvent, 15000);
         populateAlerts();
     };
+
+    // ... (rest of functions) ...
+
+    const initStatsCharts = () => {
+        const canvasEff = document.getElementById('chart-efficiency');
+        const canvas24h = document.getElementById('chart-traffic-24h');
+        const canvasViol = document.getElementById('chart-violations');
+        
+        if(!canvasEff || !canvas24h || !canvasViol) return;
+
+        // Efficiency Chart
+        if(state.charts.efficiency) state.charts.efficiency.destroy();
+        state.charts.efficiency = new Chart(canvasEff.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Fixe', 'Adaptatif'],
+                datasets: [{ 
+                    label: 'Attente (s)', 
+                    data: [124.3, 76.5], 
+                    backgroundColor: ['#27272a', '#10b981'],
+                    borderRadius: 10
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+
+        // 24h Traffic Chart
+        if(state.charts.traffic24h) state.charts.traffic24h.destroy();
+        state.charts.traffic24h = new Chart(canvas24h.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: ['0h', '4h', '8h', '12h', '16h', '20h'],
+                datasets: [{ 
+                    label: 'Véhicules', 
+                    data: [120, 80, 1100, 850, 1450, 600], 
+                    borderColor: '#3b82f6',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // Violations Chart
+        if(state.charts.violations) state.charts.violations.destroy();
+        state.charts.violations = new Chart(canvasViol.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Fixe', 'IA'],
+                datasets: [{ 
+                    data: [15, 3], 
+                    backgroundColor: ['#ef4444', '#10b981'],
+                    borderWidth: 0
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+        });
+    };
+
+    const initExportSystem = () => {
+        document.getElementById('btn-export-pdf').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Header
+            doc.setFillColor(9, 9, 11);
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.text("SIGT-BENIN | RAPPORT DE PERFORMANCE", 15, 25);
+            
+            doc.setTextColor(100, 100, 100);
+            doc.setFontSize(10);
+            doc.text(`Généré le : ${new Date().toLocaleString()}`, 15, 50);
+
+            // Table
+            doc.autoTable({
+                startY: 60,
+                head: [['Indicateur', 'Mode Fixe', 'Mode Adaptatif', 'Gain']],
+                body: [
+                    ['Temps d\'attente moy.', '124.3 s', '76.5 s', '38.5%'],
+                    ['Débit horaire moy.', '815 v/h', '1312 v/h', '61.0%'],
+                    ['Taux de violations', '12%', '2%', '83.3%'],
+                    ['CO2 économisé', '-', '-', '4.7 kg/h']
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [16, 185, 129] }
+            });
+
+            doc.save("SIGT_Cotonou_Performance.pdf");
+        });
+
+        document.getElementById('btn-export-csv').addEventListener('click', () => {
+            const data = [
+                { "Indicateur": "Temps attente", "Fixe": 124.3, "Adaptatif": 76.5, "Unite": "s" },
+                { "Indicateur": "Debit", "Fixe": 815, "Adaptatif": 1312, "Unite": "v/h" }
+            ];
+            const csv = Papa.unparse(data);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "SIGT_Data.csv");
+            link.click();
+        });
+    };
+});
 
     const updateSystemLoad = () => {
         const load = 30 + Math.floor(Math.random() * 20);
