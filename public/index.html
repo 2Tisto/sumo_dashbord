@@ -251,6 +251,46 @@
                     </div>
                 </section>
 
+                <!-- Statistiques & Rapports -->
+                <section id="screen-stats" class="screen-view hidden space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl shadow-xl card-glow">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-zinc-500 mb-6">Gain de Fluidité (SUMO)</h3>
+                            <div class="h-64">
+                                <canvas id="chart-efficiency"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl shadow-xl card-glow">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-zinc-500 mb-6">Débit Horaire (24h)</h3>
+                            <div class="h-64">
+                                <canvas id="chart-traffic-24h"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl shadow-xl card-glow">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-zinc-500 mb-6">Violations Feux</h3>
+                            <div class="h-64">
+                                <canvas id="chart-violations"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export System -->
+                    <div class="bg-zinc-900 border border-zinc-800 p-8 rounded-3xl flex items-center justify-between shadow-2xl">
+                        <div>
+                            <h3 class="text-lg font-bold text-white uppercase tracking-tight">Rapports de Performance</h3>
+                            <p class="text-xs text-zinc-500 mt-1">Exportez les données analytiques au format PDF ou CSV.</p>
+                        </div>
+                        <div class="flex gap-4">
+                            <button id="btn-export-pdf" class="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-lg">
+                                <i data-lucide="file-text" class="w-4 h-4"></i> PDF Report
+                            </button>
+                            <button id="btn-export-csv" class="flex items-center gap-2 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
+                                <i data-lucide="download" class="w-4 h-4"></i> CSV Export
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Settings -->
                 <section id="screen-settings" class="screen-view hidden">
                     <form id="settings-form" class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-6 max-w-2xl mx-auto">

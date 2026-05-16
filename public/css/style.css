@@ -58,4 +58,13 @@
     z-index: 400;
 }
 
-.nav-item { color: #71717a; transition: all 0.3s; cursor: pointer; }
+.nav-item { color: #71717a; transition: all 0.3s; cursor: pointer; border-left: 3px solid transparent; }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.nav-item.active { color: #3b82f6; background: rgba(59, 130, 246, 0.1); border-left-color: #3b82f6; }
+
+.hidden { display: none !important; }
+.opacity-0 { opacity: 0; pointer-events: none; }
+
+/* Dashboard Cards */
+.card-glow { transition: all 0.3s ease; }
+.card-glow:hover { border-color: rgba(59, 130, 246, 0.5); box-shadow: 0 0 20px rgba(59, 130, 246, 0.1); }
