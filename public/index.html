@@ -118,9 +118,16 @@
                             <p class="text-[10px] text-emerald-500 font-bold mt-2">Baisse infractions feux</p>
                         </div>
                     </div>
-                    <div class="h-[450px] bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl relative" id="map-container">
-                        <div class="absolute top-4 right-4 z-[1000] bg-zinc-950/80 backdrop-blur-md p-3 rounded-xl border border-zinc-800 text-[10px] font-bold text-zinc-400">
-                            COORD: 6.3812°N, 2.3754°E
+                    <div class="h-[450px] rounded-3xl overflow-hidden shadow-2xl relative border border-zinc-800">
+                        <iframe
+                            src="https://maps.google.com/maps?q=6.3812,2.3754&z=17&output=embed&hl=fr"
+                            class="w-full h-full border-0"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                        <div class="absolute top-4 right-4 z-[1000] bg-zinc-950/90 backdrop-blur-md px-3 py-2 rounded-xl border border-zinc-800 text-[10px] font-bold text-emerald-400 pointer-events-none">
+                            ● INT-01 STADE AMITIÉ — ACTIF
                         </div>
                     </div>
                 </section>

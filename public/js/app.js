@@ -102,29 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const initMap = () => {
-        const mapContainer = document.getElementById('map-container');
-        if(!mapContainer) return;
-        
-        // Si la carte existe déjà, juste recalculer la taille
-        if(state.mapInitialized && state.map) {
-            setTimeout(() => state.map.invalidateSize(), 100);
-            return;
-        }
-        
-        state.map = L.map('map-container').setView([6.3812, 2.3754], 16);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '© CartoDB | SIGT-BENIN',
-            maxZoom: 19
-        }).addTo(state.map);
-        
-        const icon = L.divIcon({
-            className: 'custom-marker',
-            html: `<div style="width:18px;height:18px;background:#10b981;border-radius:50%;border:3px solid white;box-shadow:0 0 14px #10b981;"></div>`
-        });
-        L.marker([6.3812, 2.3754], { icon }).addTo(state.map)
-            .bindPopup(`<b style="color:#09090b">INT-01 | Carrefour du Stade de l'Amitié ✔ MaxPressure Actif</b>`);
-        
-        state.mapInitialized = true;
+        // Carte gérée par l'iframe Google Maps (index.html)
+        // Leaflet remplacé pour un rendu fidèle au style Google Maps
     };
 
     const updateIntersection = () => {
