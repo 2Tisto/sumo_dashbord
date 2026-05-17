@@ -45,9 +45,19 @@
     border: 1px solid rgba(255,255,255,0.05);
 }
 
-.light-bulb.active-red { background: var(--neon-red); filter: brightness(1); box-shadow: 0 0 15px var(--neon-red); }
+@keyframes intenseGlowGreen {
+    0%, 100% { box-shadow: 0 0 15px var(--neon-green); }
+    50% { box-shadow: 0 0 25px var(--neon-green), 0 0 5px var(--neon-green); transform: scale(1.05); }
+}
+
+@keyframes intenseGlowRed {
+    0%, 100% { box-shadow: 0 0 15px var(--neon-red); }
+    50% { box-shadow: 0 0 25px var(--neon-red), 0 0 5px var(--neon-red); transform: scale(1.05); }
+}
+
+.light-bulb.active-red { background: var(--neon-red); filter: brightness(1); animation: intenseGlowRed 2s infinite ease-in-out; }
 .light-bulb.active-orange { background: var(--neon-amber); filter: brightness(1); box-shadow: 0 0 15px var(--neon-amber); }
-.light-bulb.active-green { background: var(--neon-green); filter: brightness(1); box-shadow: 0 0 15px var(--neon-green); }
+.light-bulb.active-green { background: var(--neon-green); filter: brightness(1); animation: intenseGlowGreen 2s infinite ease-in-out; }
 
 
 /* Leaflet Map Container */
@@ -73,3 +83,13 @@
 
 /* Settings Table */
 #screen-settings input[type=number] { color: #10b981; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+
+/* Mobile Bottom Nav */
+nav .nav-item { border-left: none !important; border-bottom: 2px solid transparent; border-radius: 0.75rem; }
+nav .nav-item.active { color: #10b981; background: rgba(16, 185, 129, 0.1); border-left: none !important; border-bottom-color: #10b981; }
+nav .nav-item.active i { filter: drop-shadow(0 0 6px #10b981); }
+
+/* Safe area on iPhone */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem); }
+}

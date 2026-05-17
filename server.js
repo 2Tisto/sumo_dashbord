@@ -1,16 +1,29 @@
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = 'cotonou_sigt_secure_key_2024';
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
+
+// --- WebSockets ---
+io.on('connection', (socket) => {
+    console.log('[WS] Client connecté au tableau de bord:', socket.id);
+    socket.on('disconnect', () => {
+        console.log('[WS] Client déconnecté:', socket.id);
+    });
+});
 
 // --- Mock Database ---
 let config = {
@@ -28,6 +41,14 @@ let alerts = [
 ];
 
 // --- Routes API ---
+app.post('/api/sumo/data', (req, res) => {
+    const data = req.body;
+    console.log(`[API] Trafic reçu (${data.sim_time}s) | Phase: ${data.current_phase.toUpperCase()} | Pression: NS=${data.pressure_ns} EO=${data.pressure_eo}`);
+    // On rediffuse instantanément la donnée au front-end
+    io.emit('traffic_update', data);
+    res.json({ success: true, message: "Données diffusées au tableau de bord" });
+});
+
 app.post('/api/auth/login', (req, res) => {
     const { username, password } = req.body;
     if (username === 'admin' && password === 'admin') {
@@ -60,6 +81,6 @@ app.post('/api/config/update', (req, res) => {
     res.json({ success: true, message: "Configuration envoyée via MQTT" });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`SIGT Backend running on http://localhost:${PORT}`);
 });
