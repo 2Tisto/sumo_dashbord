@@ -15,7 +15,7 @@ const SECRET_KEY = 'cotonou_sigt_secure_key_2024';
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // --- WebSockets ---
 io.on('connection', (socket) => {

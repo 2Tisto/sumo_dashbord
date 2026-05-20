@@ -279,9 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Stade de l'Amitié, Cotonou
                 state.map = L.map('leaflet-map', { zoomControl: false }).setView([6.387, 2.378], 16);
                 
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap',
-                    maxZoom: 19
+                L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains:['mt0','mt1','mt2','mt3'],
+                    attribution: 'Google Maps'
                 }).addTo(state.map);
 
                 const icon = L.divIcon({

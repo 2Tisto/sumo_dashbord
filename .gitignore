@@ -1,0 +1,16 @@
+# Fichiers de dépendances Node
+node_modules/
+package-lock.json
+
+# Fichiers de configuration locale (sensibles)
+.env.local
+.env
+
+# Fichiers temporaires Python
+__pycache__/
+*.pyc
+
+# Autres fichiers temporaires
+.DS_Store
+dist/
+build/
