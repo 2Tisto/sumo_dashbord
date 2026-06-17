@@ -42,9 +42,31 @@ let alerts = [
 
 // --- Routes API ---
 app.post('/api/sumo/data', (req, res) => {
+    // 1. Validation de la clé API
+    const apiKey = req.headers['x-api-key'];
+    const expectedKey = 'sigt_cotonou_secret_2024';
+    if (apiKey !== expectedKey) {
+        console.warn(`[API] Requête rejetée : Clé API invalide ou manquante (reçue: ${apiKey})`);
+        return res.status(401).json({ success: false, message: "Clé API invalide ou manquante" });
+    }
+
     const data = req.body || {};
-    const phase = (data.current_phase || 'NS').toUpperCase();
-    console.log(`[API] Trafic reçu (${data.sim_time || 0}s) | Phase: ${phase} | Pression: NS=${data.pressure_ns || 0} EO=${data.pressure_eo || 0}`);
+
+    // 2. Validation des champs obligatoires
+    const requiredFields = [
+        'sim_time', 'current_phase', 'pressure_ns', 'pressure_eo', 
+        'queue_length_ns', 'queue_length_eo', 'avg_wait_time', 
+        'throughput', 'active_vehicles', 'motorcycles_count', 'emergency_count'
+    ];
+    const missingFields = requiredFields.filter(field => data[field] === undefined);
+    if (missingFields.length > 0) {
+        console.warn(`[API] Requête rejetée : Champs manquants (${missingFields.join(', ')})`);
+        return res.status(400).json({ success: false, message: `Données incomplètes. Champs manquants : ${missingFields.join(', ')}` });
+    }
+
+    const phase = data.current_phase.toUpperCase();
+    console.log(`[API] Trafic reçu (${data.sim_time}s) | Phase: ${phase} | Pression: NS=${data.pressure_ns} EO=${data.pressure_eo}`);
+    
     // On rediffuse instantanément la donnée au front-end
     io.emit('traffic_update', data);
     res.json({ success: true, message: "Données diffusées au tableau de bord" });
