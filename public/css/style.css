@@ -67,7 +67,7 @@
 .nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
 .nav-item.active { color: #10b981; background: rgba(16, 185, 129, 0.1); border-left-color: #10b981; }
 
-.hidden { display: none !important; }
+.hidden { display: none; }
 .opacity-0 { opacity: 0; pointer-events: none; }
 
 /* Dashboard Cards */
