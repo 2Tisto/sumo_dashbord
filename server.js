@@ -42,8 +42,9 @@ let alerts = [
 
 // --- Routes API ---
 app.post('/api/sumo/data', (req, res) => {
-    const data = req.body;
-    console.log(`[API] Trafic reçu (${data.sim_time}s) | Phase: ${data.current_phase.toUpperCase()} | Pression: NS=${data.pressure_ns} EO=${data.pressure_eo}`);
+    const data = req.body || {};
+    const phase = (data.current_phase || 'NS').toUpperCase();
+    console.log(`[API] Trafic reçu (${data.sim_time || 0}s) | Phase: ${phase} | Pression: NS=${data.pressure_ns || 0} EO=${data.pressure_eo || 0}`);
     // On rediffuse instantanément la donnée au front-end
     io.emit('traffic_update', data);
     res.json({ success: true, message: "Données diffusées au tableau de bord" });
