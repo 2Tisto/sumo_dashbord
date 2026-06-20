@@ -96,9 +96,14 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSystemLoad();
         }, 1000);
         
-        // Simulations locales retirées au profit de WebSocket
-        // setInterval(updateIntersection, 1000);
-        // setInterval(simulateMaxPressure, 1500);
+        // ✅ Simulation locale RESTAURÉE — feux animés en autonome
+        // SUMO override si données reçues via WebSocket
+        setInterval(updateIntersection, 1000);
+        setInterval(simulateMaxPressure, 1500);
+        
+        // Appel initial immédiat pour ne pas attendre 1 seconde
+        state.timer = state.T_BASE;
+        updateTrafficLights();
         
         setInterval(triggerEmergencyEvent, 300000); // Gardé en secours pour démo
         populateAlerts();
@@ -200,32 +205,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(elW) elW.innerText = Math.floor(data.queue_length_eo / 2);
             }
 
-            // 2. Mise à jour des feux et chronomètre
+            // 2. Mise à jour des feux et chronomètre (override SUMO)
             if (data.current_phase) {
                 const newPhase = data.current_phase.toLowerCase() === 'ns' ? 'NS' : 'EW';
                 
-                // Si la phase change, on réinitialise le timer, sinon on décrémente pour l'animation
+                // SUMO override : si la phase change, on resynchronise le timer local
                 if (state.intersectionPhase !== newPhase) {
                     state.intersectionPhase = newPhase;
-                    state.timer = state.T_BASE; 
-                } else {
-                    if (state.timer > 0) state.timer--;
+                    state.timer = data.phase_duration || state.T_BASE; 
                 }
                 
                 const label = document.getElementById('active-phase-label');
                 if(label) label.innerText = state.intersectionPhase === 'NS' ? 'AXE NORD-SUD' : 'AXE EST-OUEST';
                 
-                const timerEl = document.getElementById('phase-timer');
-                if(timerEl) timerEl.innerText = state.timer.toString().padStart(2, '0');
-                
-                const chronoText = document.getElementById('chrono-text');
-                if(chronoText) {
-                    const elapsed = Math.max(0, state.T_BASE - state.timer).toString().padStart(2, '0');
-                    chronoText.innerText = `00:00:${elapsed} / 00:01:00`;
-                    const progress = document.getElementById('phase-progress');
-                    if(progress) progress.style.width = ((state.T_BASE - state.timer) / state.T_BASE * 100) + '%';
-                }
-                
+                // La simulation locale (setInterval) gère le décompte — pas besoin de le refaire ici
                 updateTrafficLights();
             }
 
@@ -309,20 +302,24 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateIntersection = () => {
-        if(state.currentScreen !== 'intersection') return;
+        // Tourne en permanence (pas de garde sur currentScreen)
+        // pour que les feux soient prêts dès l'ouverture de l'écran
         state.timer--;
-        if(state.timer < 0) {
+        if(state.timer <= 0) {
             state.timer = state.T_BASE;
             state.intersectionPhase = state.intersectionPhase === 'NS' ? 'EW' : 'NS';
             const label = document.getElementById('active-phase-label');
             if(label) label.innerText = state.intersectionPhase === 'NS' ? 'AXE NORD-SUD' : 'AXE EST-OUEST';
         }
+        
+        if(state.currentScreen !== 'intersection') return; // MAJ UI uniquement si visible
+        
         const timerEl = document.getElementById('phase-timer');
         if(timerEl) timerEl.innerText = state.timer.toString().padStart(2, '0');
         
         const chronoText = document.getElementById('chrono-text');
         if(chronoText) {
-            const elapsed = (state.T_BASE - state.timer).toString().padStart(2, '0');
+            const elapsed = Math.max(0, state.T_BASE - state.timer).toString().padStart(2, '0');
             chronoText.innerText = `00:00:${elapsed} / 00:01:00`;
             const progress = document.getElementById('phase-progress');
             if(progress) progress.style.width = ((state.T_BASE - state.timer) / state.T_BASE * 100) + '%';
